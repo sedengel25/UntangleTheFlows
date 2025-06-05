@@ -1,43 +1,32 @@
-#library(MASS)
 library(tidyverse)
 library(here)
 library(lubridate)
 library(sf)
-library(dbscan)
 library(leaflet)
-library(RColorBrewer)
 library(reticulate)
-library(parallelDist)
 library(scales)
 library(viridis)
-library(dbscan)
-library(princurve)
 
+################################################################################
+# Config
+################################################################################
 reticulate::py_config()
 
 use_virtualenv("r-reticulate", required = TRUE)
 
-hdb   <- import("hdbscan")
 np    <- import("numpy")
 pacmap <- import("pacmap")
 
-synth.data.path <- here("data",
-                   "flows",
-                   "synthetic",
-                   "synthetic_euclid")
-synth.data <- list.dirs(synth.data.path, full.names = FALSE, recursive = FALSE)
+
 path.od.flow.distmat <- here("data",
-                             "flows",
-                             "synthetic",
-                             "synthetic_euclid",
+                             "distance_distribution",
                              "elbe_ea0caa86-ee07-11ef-ac6b-e00af670e1c9",
                              "euclid")
-#path.od.flow.distmat <- here("data","flows","realworld","mo_do_9","euclid")
-int.id <- 1
-dist.org <- np$load(file = here(path.od.flow.distmat,
-                                       "dist_mat.npy"))
-pacmap.emb <- np$load(here(path.od.flow.distmat, paste0("embedding_4d_", int.id,".npy")))
-dist.emb <- dist(pacmap.emb)%>% as.matrix()
+
+
+dist.org <- np$load(file = here(path.od.flow.distmat, "dist_mat.npy"))
+pacmap.emb <- np$load(here(path.od.flow.distmat, paste0("embedding_4d_1.npy")))
+dist.emb <- dist(pacmap.emb) %>% as.matrix()
 
 d.org.vec <- dist.org[lower.tri(dist.org)]
 d.emb.vec <- dist.emb[lower.tri(dist.emb)]
@@ -53,65 +42,24 @@ df.distances <- bind_rows(
 df.distances.wide <- data.frame(Original = d.org.vec,
                                 PaCMAP = d.emb.vec)
 
-rm(d.org.vec)
-rm(d.emb.vec)
-gc()
-
 viridis.pal = c(viridis::viridis(n = 3)[2:3])
-# viridis.pal <- c("grey80", "grey50")
 
-
-
-
-
-
+################################################################################
+# Heatmap
+################################################################################
 peak.labels.heatmap <- data.frame(
-  x = c(
-     0.02 # A
-    ,0.19   # B
-    ,0.34  # C
-    ,0.38  # D
-    # ,0.30  # E
-    # ,0.28  # F
-    # ,0.18  # G
-    # ,0.33  # H
-    # ,0.51  # I
-    # ,0.55  # J
-  ),
-  y = c(
-     0.055 # A
-    ,0.48  # B
-    ,0.62  # C
-    ,0.73  # D
-    # ,0.71  # E
-    # ,0.76  # F
-    # ,0.62  # G
-    # ,0.78  # H
-    # ,0.85  # I
-    # ,0.91   #J
-  ),
-  label = c(
-    "A",
-    "B",
-    "C",
-    "D"
-    # "E",
-    # "F",
-    # "G",
-    # "H",
-    # "I",
-    # "J"
-  )
-)
+  x = c(0.02, 0.19, 0.34, 0.38),
+  y = c(0.055, 0.48, 0.62, 0.73),
+  label = c("A", "B", "C", "D"))
 
 
 ggplot(df.distances.wide) +
   stat_density_2d(
     aes(x = Original, y = PaCMAP, fill = after_stat(level)),
     geom    = "polygon",
-    n       = 300,                    # höhere Auflösung (300×300 statt 100×100)
-    h       = c(0.05, 0.05),          # kleinere Bandbreite in x- und y-Richtung
-    contour = TRUE,                   # zeichnet geschlossene Konturen
+    n       = 300,                    
+    h       = c(0.05, 0.05),          
+    contour = TRUE,                   
     alpha   = 0.4
   ) +
   #geom_point(aes(x = Original, y = PaCMAP), size = 0.5, alpha = 0.01) +
@@ -119,15 +67,14 @@ ggplot(df.distances.wide) +
     "polygon",
     x     = c(0, 0, 1),
     y     = c(0, 1, 1),
-    fill  = "grey90",  # sehr helles Grau
+    fill  = "grey90",  
     alpha = 0.2
   ) +
-  # 2) Polygon für untere Hälfte in mittlerem Grau
   annotate(
     "polygon",
     x     = c(0, 1, 1),
     y     = c(0, 0, 1),
-    fill  = "grey60",  # etwas dunkleres Grau
+    fill  = "grey60", 
     alpha = 0.2
   ) +
   annotate(
@@ -144,13 +91,13 @@ ggplot(df.distances.wide) +
     y     = 0.05,
     label = "Attract",
     size  = 6,
-    color = "grey40"   # etwas dunkler für guten Kontrast
+    color = "grey40"   
   ) +
   geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
   labs(x = "Original distances", y = "PaCMAP distances") +
   scale_fill_viridis_c(option = "D", 
                        name = "Density",
-                       labels = scales::label_number(accuracy = 1)) +  # Viridis-Skala
+                       labels = scales::label_number(accuracy = 1)) + 
   geom_text(
     data = peak.labels.heatmap,
     aes(x = x, y = y, label = label),
@@ -182,16 +129,11 @@ ggplot(df.distances.wide) +
   )
 
 ggsave("./output/distance_heatmap.pdf", device = "pdf", width = 8, height = 8)
-df.vlines <- data.frame(
-  pos   = c(peak.labels.heatmap$x, peak.labels.heatmap$y),
-  label = rep(peak.labels.heatmap$label, 2),
-  which = rep(c("x", "y"), each = nrow(peak.labels.heatmap))
-)
 
 
-
-
-
+################################################################################
+# Density plot
+################################################################################
 df.vlines <- data.frame(
   pos   = c(peak.labels.heatmap$x, peak.labels.heatmap$y),
   label = rep(peak.labels.heatmap$label, 2),
@@ -247,9 +189,6 @@ df.arrows <- peak.labels.density %>%
     x_end   = x_P,  y_end   = y_P
   )
 
-# df.arrows[1, c("x_start", "y_start", "x_end", "y_end")] <-
-#   df.arrows[1, c("x_end",   "y_end",   "x_start", "y_start")]
-
 df.arrows.adj <- df.arrows %>%
   rowwise() %>%
   mutate(
@@ -265,23 +204,12 @@ df.arrows.adj <- df.arrows %>%
   ) %>%
   ungroup()
 
-# df.arrows.adj[1, "x_end"] <- 0.0025
-# df.arrows.adj[1, "x_start"] <- 0.025
-# df.arrows.adj[1, "y_end"] <- 
-# df.arrows.adj[1, "y_start"] <- 0.21
-
-# delta_x <- 0.00005   # um 0.05 nach links
-# delta_y <- 0.00005   # um 0.05 nach oben
-# df.arrows.adj$x_start_adj[1] <- df.arrows.adj$x_start_adj[1] - delta_x
-# df.arrows.adj$y_start_adj[1] <- df.arrows.adj$y_start_adj[1] + delta_y
-# 4) Jetzt rufen wir ggplot auf und setzen genau diese eine scale_color_manual:
 ggplot(df.distances, aes(x = dist, fill = type, color = type)) +
   geom_density(aes(y = after_stat(scaled)),
                alpha = 0.7, color = "black", linewidth = .5) +
   labs(x = "Distance", y = "Density") +
-  scale_fill_manual(values = viridis.pal) +   # fill für densities
-  scale_color_manual(values = all.colors) +   # eine gemeinsame Farbskala
-  # für beide: 'type' und 'label'
+  scale_fill_manual(values = viridis.pal) +  
+  scale_color_manual(values = all.colors) + 
   geom_text(
     data      = peak.labels.density,
     aes(x = x, y = y, label = label),
