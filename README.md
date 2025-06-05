@@ -38,7 +38,7 @@ This `shiny` dashboard enables users to interactively set the `minpts` parameter
 
 ---
 
-## Reproducibility of Experimental Results
+## Reproducibility
 Unfortunately, due to data protection and copyright reasons, the data used for the qualitative real-world analysis cannot be provided. To enable the reproducability of the synthetic experiments conducted as well as the distance-distribution plots, the 100 synthetic OD flow datasets used can be downloaded from [Zenodo](https://zenodo.org/records/15025399?preview=1&token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjIwYzY5NzgwLTRlN2EtNGI3Yy04OGJkLWU2NzNmMTdlMWEyYiIsImRhdGEiOnt9LCJyYW5kb20iOiIzMDY0NGZhN2ViNzkwZmExMDE1NzQxZDA0NmRmN2E2MiJ9.FZxejH2itkRpWa-T4MRH62ZDfkAu8QtiQksBd0pzQ7rlRiXnLTkzo3kZbblljaiGSUUBA7leOD-utgRJ_PrUXw). It is recommended to unzip `experiment_synthetic.zip` in the folder `/data/synthetic_data_experiment`.
 
 
