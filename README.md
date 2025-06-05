@@ -57,7 +57,8 @@ This script simply further processes the results to prepare for visualization. R
 ### Visualize experiment results (`repro_exp_vis.R`)
 This script creates the boxplot from the paper, comparing the CVI results for all three algorithms and all three different distance measures, as well as the boxplot for all `hdbscan`-configurations. **Note:** If the experiment cannot be run, the second dataset from [Zenodo](https://zenodo.org/records/15025399?preview=1&token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjIwYzY5NzgwLTRlN2EtNGI3Yy04OGJkLWU2NzNmMTdlMWEyYiIsImRhdGEiOnt9LCJyYW5kb20iOiIzMDY0NGZhN2ViNzkwZmExMDE1NzQxZDA0NmRmN2E2MiJ9.FZxejH2itkRpWa-T4MRH62ZDfkAu8QtiQksBd0pzQ7rlRiXnLTkzo3kZbblljaiGSUUBA7leOD-utgRJ_PrUXw) (`experiment_results.zip`) can be extracted to `res_exp_final` to enable the visualizations.
 
-
+### Reproduce distance-distribution plots (`repro_distance_distribution.R`)
+Running `repro_distance_distribution.R` loads the original OD flow distance matrix and one specific PaCMAP embedding of the provided synthetic OD flow dataset and creats the distance heatmap (Figure 5) as well as the distance distribution  (Figure 6) shown in the paper. To inspect these plots for additional synthetic datasets, one of the downloaded datasets in `/data/synthetic_data_experiment` can be copied to `data/distance_distribution`. Vertical lines, as discussed in the paper to locate the peaks A–D, can optionally be included. This can be done by uncommenting the corresponding `geom_vline(...)` commands in the script. The positions of these lines (and the associated peaks) of course vary depending on the dataset used.
 ---
 ## Requirements
 The files `R_requirements.txt` and `py_requirements.txt` list the `R` and `Python` packages, along with their respective versions, used in this project.  

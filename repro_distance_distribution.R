@@ -6,7 +6,7 @@ library(leaflet)
 library(reticulate)
 library(scales)
 library(viridis)
-
+library(RColorBrewer)
 ################################################################################
 # Config
 ################################################################################
@@ -20,7 +20,7 @@ pacmap <- import("pacmap")
 
 path.od.flow.distmat <- here("data",
                              "distance_distribution",
-                             "elbe_ea0caa86-ee07-11ef-ac6b-e00af670e1c9",
+                             "elbe_db182022-ee08-11ef-ac6b-e00af670e1c9",
                              "euclid")
 
 
@@ -128,7 +128,7 @@ ggplot(df.distances.wide) +
     plot.margin = margin(t = 10, r = 12, l = 10)
   )
 
-ggsave("./output/distance_heatmap.pdf", device = "pdf", width = 8, height = 8)
+# ggsave("./output/distance_heatmap.pdf", device = "pdf", width = 8, height = 8)
 
 
 ################################################################################
@@ -221,7 +221,8 @@ ggplot(df.distances, aes(x = dist, fill = type, color = type)) +
   # geom_vline(
   #   data      = df.vlines,
   #   aes(xintercept = pos, color = label, linetype = which),
-  #   linewidth = 1
+  #   linewidth = 1,
+  #   alpha = 0.3
   # ) +
   geom_segment(
     data        = df.arrows.adj,
@@ -251,7 +252,7 @@ ggplot(df.distances, aes(x = dist, fill = type, color = type)) +
   )
 
 
-ggsave("./output/distance_distribution.pdf", device = "pdf", width = 8, height = 8)
+# ggsave("./output/distance_distribution.pdf", device = "pdf", width = 8, height = 8)
 
 
 
