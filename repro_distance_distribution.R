@@ -1,3 +1,4 @@
+library(MASS)
 library(tidyverse)
 library(here)
 library(lubridate)
@@ -20,7 +21,7 @@ pacmap <- import("pacmap")
 
 path.od.flow.distmat <- here("data",
                              "distance_distribution",
-                             "elbe_db182022-ee08-11ef-ac6b-e00af670e1c9",
+                             "elbe_ea0caa86-ee07-11ef-ac6b-e00af670e1c9",
                              "euclid")
 
 
@@ -52,10 +53,22 @@ peak.labels.heatmap <- data.frame(
   y = c(0.055, 0.48, 0.62, 0.73),
   label = c("A", "B", "C", "D"))
 
+# Get the underlying KDE from stat_density_2d to use relative density for the legend
+x <- df.distances.wide$Original
+y <- df.distances.wide$PaCMAP
+dens <- kde2d(x = x, y = y, n = 300, h = c(0.05, 0.05))
+df.grid <- expand.grid(
+  Original = dens$x,
+  PaCMAP   = dens$y
+)
+df.grid$density <- as.vector(dens$z)
+df.grid$ndensity <- df.grid$density / max(df.grid$density)
+max.density <- max(df.grid$density)
+
 
 ggplot(df.distances.wide) +
   stat_density_2d(
-    aes(x = Original, y = PaCMAP, fill = after_stat(level)),
+    aes(x = Original, y = PaCMAP, fill = after_stat(level / (!!max.density))),
     geom    = "polygon",
     n       = 300,                    
     h       = c(0.05, 0.05),          
@@ -97,7 +110,23 @@ ggplot(df.distances.wide) +
   labs(x = "Original distances", y = "PaCMAP distances") +
   scale_fill_viridis_c(option = "D", 
                        name = "Density",
-                       labels = scales::label_number(accuracy = 1)) + 
+                       breaks  = seq(0, 1, 0.25),
+                       labels  = function(x) {
+                         vapply(x, function(v) {
+                           if (v == 0 || v == 1) {
+                             format(v, nsmall = 0, trim = TRUE)
+                           } else {
+                             format(round(v, 2), nsmall = 2, trim = TRUE)
+                           }
+                         }, FUN.VALUE = character(1))
+                       },
+                       limits  = c(0, 1),
+                       guide   = guide_colorbar(
+                         barwidth       = unit(5, "cm"),
+                         barheight      = unit(0.4, "cm"),
+                         title.position = "left",
+                         title.theme    = element_text(margin = margin(r = 15)))
+                       )+ 
   geom_text(
     data = peak.labels.heatmap,
     aes(x = x, y = y, label = label),
@@ -128,7 +157,7 @@ ggplot(df.distances.wide) +
     plot.margin = margin(t = 10, r = 12, l = 10)
   )
 
-# ggsave("./output/distance_heatmap.pdf", device = "pdf", width = 8, height = 8)
+ggsave("./output/distance_heatmap.pdf", device = "pdf", width = 8, height = 8)
 
 
 ################################################################################
@@ -252,7 +281,7 @@ ggplot(df.distances, aes(x = dist, fill = type, color = type)) +
   )
 
 
-# ggsave("./output/distance_distribution.pdf", device = "pdf", width = 8, height = 8)
+ggsave("./output/distance_distribution.pdf", device = "pdf", width = 8, height = 8)
 
 
 

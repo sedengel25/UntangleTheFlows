@@ -123,7 +123,7 @@ dt.dist.mat <- read_rds(here("input", "local_node_dist_mat.rds"))
 char.dist.measure <- "chebyshev_euclid" # further options: "chebyshev_euclid", "manhattan_network"
 char.dirs <- list.dirs(here("data", "synthetic_data_generated"), full.names = FALSE, recursive = FALSE)
 char.dirs
-char.data <- char.dirs[2]
+char.data <- char.dirs[1]
 path.data <- here("data", "synthetic_data_generated", char.data, char.dist.measure)
 
 if(!dir.exists(here(path.data))){

@@ -18,7 +18,7 @@ np <- import("numpy")
 ################################################################################
 char.dirs <- list.dirs(here("data", "synthetic_data_generated"), full.names = FALSE, recursive = FALSE)
 char.dirs
-char.data <- char.dirs[2]
+char.data <- char.dirs[1]
 path.data <- here("data", "synthetic_data_generated", char.data)
 char.dist.measure <- "chebyshev_euclid"
 int.id <- 1
